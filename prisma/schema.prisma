@@ -74,7 +74,7 @@ model Family {
   users         FamilyMemberShip[]
   userInvites   UserInvites[]
 
-  @@map("organizations")
+  @@map("families")
 }
 
 // Many-to-many relation between User and Organization
@@ -88,7 +88,7 @@ model FamilyMemberShip {
   role         Role         @relation(fields: [roleId], references: [id])
 
   @@id([userId, familyId]) // Composite primary key
-  @@map("organization_memberships")
+  @@map("family_memberships")
 }
 
 enum RoleEnum {
