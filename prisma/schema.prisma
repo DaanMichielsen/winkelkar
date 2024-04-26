@@ -6,15 +6,92 @@ generator client {
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model UserInvites {
+  id             Int       @id @default(autoincrement())
+  email          String
+  familyId String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime? // For soft deletes
 
-    @@index([name])
+  // Relations
+  family Family @relation(fields: [familyId], references: [id])
+
+  @@map("user_invites")
+}
+
+model User {
+  id        String    @id @default(cuid()) // Cuid provides readability and uniqueness
+  // We could opt for using GUIDs or UUIDs when we want to reduce predictability of the identifiers
+  // On the other hand if the predictability is not a concern, we could use autoincrementing integers since they require less storage capacity
+  auth0Id   String    @unique // Maps to the Auth0 user ID
+  email     String    @unique
+  firstName String?
+  lastName  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // For soft deletes
+  image     String?
+
+  //configuration
+  config Json?
+
+  // Relations
+  families     FamilyMemberShip[] // One user can belong to multiple organizations
+  lastSelectedFamilyId String? // Store the last selected organization ID
+
+  @@map("users")
+}
+
+model Role {
+  id            Int                      @id @default(autoincrement())
+  name          RoleEnum                 @unique @default(USER)
+  users         FamilyMemberShip[]
+  userInvitesId Int?
+
+  @@map("roles")
+}
+
+model Family {
+  id         String    @id @default(cuid()) // Cuid provides readability and uniqueness
+  slug       String    @unique
+  name       String    @unique
+  street     String
+  number     String
+  postalCode String
+  city       String
+  country    String
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime? // For soft deletes
+  image      String    @default("https://via.placeholder.com/150")
+
+  // Relations
+  users         FamilyMemberShip[]
+  userInvites   UserInvites[]
+
+  @@map("organizations")
+}
+
+// Many-to-many relation between User and Organization
+model FamilyMemberShip {
+  userId         String
+  familyId       String
+  roleId         Int
+
+  user         User         @relation(fields: [userId], references: [id])
+  family       Family @relation(fields: [familyId], references: [id])
+  role         Role         @relation(fields: [roleId], references: [id])
+
+  @@id([userId, familyId]) // Composite primary key
+  @@map("organization_memberships")
+}
+
+enum RoleEnum {
+  ADMIN
+  USER
 }
