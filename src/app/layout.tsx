@@ -1,8 +1,11 @@
 import "~/styles/globals.css";
 
-import { Inter } from "next/font/google";
+import { Inter as FontSans } from "next/font/google";
+import { cn } from "~/lib/utils";
+import { Toaster } from "~/components/ui/sonner";
+import { ThemeProvider } from "~/components/theme-provider";
 
-const inter = Inter({
+const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
 });
@@ -20,7 +23,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`font-sans ${inter.variable}`}>{children}</body>
+      <body
+        className={cn(
+          "bg-background min-h-screen font-sans antialiased",
+          fontSans.variable,
+        )}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <main>
+            {children}
+            <Toaster />
+          </main>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
