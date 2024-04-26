@@ -4,9 +4,8 @@ import { Inter as FontSans } from "next/font/google";
 import { cn } from "~/lib/utils";
 import { Toaster } from "~/components/ui/sonner";
 import { ThemeProvider } from "~/components/theme-provider";
+import { TopNavLoggedOut } from "./_components/top-nav";
 import { ClerkProvider } from "@clerk/nextjs";
-import { MobileNav } from "./_components/mobile-nav";
-import { TopNav } from "./_components/top-nav";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -25,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
+    <html lang="en">
+      <ClerkProvider>
         <body
           className={cn(
             "bg-background min-h-screen font-sans antialiased",
@@ -39,13 +38,12 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <TopNav />
-            <MobileNav />
+            <TopNavLoggedOut />
             {children}
             <Toaster />
           </ThemeProvider>
         </body>
-      </html>
-    </ClerkProvider>
+      </ClerkProvider>
+    </html>
   );
 }
